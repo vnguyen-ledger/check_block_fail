@@ -3,8 +3,11 @@
 
 from ast import arg
 import configparser
+from logging.config import valid_ident
+from multiprocessing import Value
 from platform import node
 import string
+from wsgiref.validate import validator
 import requests
 config = configparser.ConfigParser()
 config.read('config.cfg')
@@ -61,9 +64,11 @@ def missed_block(range_block):
     block_signature = requests.get(url='http://localhost:33000/blocks/%s' %block, headers={"Content-type": "application/json"})
     # print(dir(block_signature))
     # print(block_signature.json())
-    for validator in fail:
-      if block_signature.json()[".block.last_commit.signatures[].validator_address"] == False:
-        print("oui")
+    for keys in fail:
+      # if block_signature.json()[".block.last_commit.signatures[].validator_address"] == False:
+      fail [keys] = fail[keys] +1
+  print("missed block for each node : ")
+  print(fail)
 
   return block
 
