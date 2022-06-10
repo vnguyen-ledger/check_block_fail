@@ -56,19 +56,20 @@ def low_heigth(range):
 def missed_block(range_block):
   list = list_node_arg()
   fingerprint = nodes_fingerprint(list)
-  fail= node_fail_count(fingerprint)
+  fail_count= node_fail_count(fingerprint)
   print(fingerprint)
-  print(fail)
+  print(fail_count)
   print(low_heigth(range_block),last_block_height())
   for block in range(low_heigth(range_block), last_block_height()):
     block_signature = requests.get(url='http://localhost:33000/blocks/%s' %block, headers={"Content-type": "application/json"})
     # print(dir(block_signature))
     # print(block_signature.json())
-    for keys in fail:
+    for keys in fail_count:
       # if block_signature.json()[".block.last_commit.signatures[].validator_address"] == False:
-      fail [keys] = fail[keys] +1
-  print("missed block for each node : ")
-  print(fail)
+      fail_count[keys] = fail_count[keys] +1
+      print ("node : " + keys + "  -->  height : " + block_signature.json()["block"]["header"]["height"])
+  print("number of missed block for each node : ")
+  print(fail_count)
 
   return block
 
