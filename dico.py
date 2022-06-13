@@ -1,33 +1,53 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ast import arg
+from cgi import print_directory
 import configparser
-from logging.config import valid_ident
+import json
 from multiprocessing import Value
-from platform import node
+from optparse import Values
+from re import A
 import string
-from wsgiref.validate import validator
+from typing import List
 import requests
 config = configparser.ConfigParser()
 config.read('config.cfg')
 
+#VERSION WITH INPUT
+
+# def list_node_arg():
+#   list = []
+#   node = 'node'
+#   while node != None:
+#     node = input("enter the name of the node: ")
+#     if node == 'None':
+#       return list
+#     else:
+#       list.append(node)
+#     print(list)
+
+
+#VERSION WITH CONFIG FILE
 
 def list_node_arg():
-  list = []
-  node = 'node'
-  while node != None:
-    node = input("enter the name of the node: ")
-    if node == 'None':
-      return list
-    else:
-      list.append(node)
-    print(list)
+  list_node = {}
+  for node, finguerprint in config['List'].items():
+    list_node[node] = finguerprint
+  return list_node
+
+#VERSION WITH INPUT
+
+# def range_arg():
+#   nb = int(input("enter the range of last block: "))
+#   print(nb)
+#   return nb
+
+#VERSION WITH CONFIG FILE
 
 def range_arg():
-  nb = int(input("enter the range of last block: "))
-  print(nb)
-  return nb
+  for keys in config['Range'].values():
+    return int(keys)
+
 
 def nodes_fingerprint(list_node):
   node_fingerprint = {}
@@ -65,17 +85,29 @@ def missed_block(range_block):
     # print(dir(block_signature))
     # print(block_signature.json())
     for keys in fail_count:
-      # if block_signature.json()[".block.last_commit.signatures[].validator_address"] == False:
-      fail_count[keys] = fail_count[keys] +1
-      print ("node : " + keys + "  -->  height : " + block_signature.json()["block"]["header"]["height"])
-  print("number of missed block for each node : ")
+      for keys, values in fingerprint.items():
+        i = 0
+      # print(json.dumps(json.loads(block_signature.text), indent=4, sort_keys=True))
+        for signature in block_signature.json()["block"]["last_commit"]["signatures"]:
+        # print(signature["validator_address"])
+          if signature["validator_address"] == values:
+            i = 1
+      if i != 1:
+        fail_count[keys] = fail_count[keys] +1
+          # print(signature["validator_address"])
+          # if signature["validator_address"] == fingerprint.values():
+          #   fail_count[keys] = fail_count[keys] +1
+          #   print ("node : " + keys + "  -->  height : " + block_signature.json()["block"]["header"]["height"])
+  print("\nnumber of missed block for each node : ")
   print(fail_count)
-
-  return block
+  return fail_count
 
 def main():
   arg_range = range_arg()
-  missed_block(arg_range)
+  print(arg_range)
+  missed = missed_block(arg_range)
+  with open('data.json', 'w') as mon_fichier:
+	  json.dump(missed, mon_fichier, indent=4)
 
 if __name__ == "__main__":
     main()
