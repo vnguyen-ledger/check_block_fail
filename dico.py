@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from cgi import print_directory
 import configparser
 import json
 from multiprocessing import Value
-from optparse import Values
+from platform import node
 from re import A
-import string
+from socketserver import DatagramRequestHandler
 from typing import List
+from wsgiref.validate import validator
 import requests
 config = configparser.ConfigParser()
 config.read('config.cfg')
@@ -26,6 +26,11 @@ config.read('config.cfg')
 #       list.append(node)
 #     print(list)
 
+def option_arg():
+  nb = input("enter the range of last block: ")
+  if nb == 'detail':
+    return 1
+  return 0
 
 #VERSION WITH CONFIG FILE
 
@@ -47,7 +52,6 @@ def list_node_arg():
 def range_arg():
   for keys in config['Range'].values():
     return int(keys)
-
 
 def nodes_fingerprint(list_node):
   node_fingerprint = {}
@@ -81,33 +85,48 @@ def missed_block(range_block):
   print(fail_count)
   print(low_heigth(range_block),last_block_height())
   for block in range(low_heigth(range_block), last_block_height()):
+    i = 0
     block_signature = requests.get(url='http://localhost:33000/blocks/%s' %block, headers={"Content-type": "application/json"})
     # print(dir(block_signature))
     # print(block_signature.json())
     for keys in fail_count:
       for keys, values in fingerprint.items():
-        i = 0
       # print(json.dumps(json.loads(block_signature.text), indent=4, sort_keys=True))
         for signature in block_signature.json()["block"]["last_commit"]["signatures"]:
         # print(signature["validator_address"])
           if signature["validator_address"] == values:
             i = 1
-      if i != 1:
-        fail_count[keys] = fail_count[keys] +1
-          # print(signature["validator_address"])
-          # if signature["validator_address"] == fingerprint.values():
-          #   fail_count[keys] = fail_count[keys] +1
-          #   print ("node : " + keys + "  -->  height : " + block_signature.json()["block"]["header"]["height"])
+        if i != 1:
+          fail_count[keys] = fail_count[keys] +1
+          print(int(block_signature.json()["block"]["header"]["height"])-1)
   print("\nnumber of missed block for each node : ")
   print(fail_count)
   return fail_count
 
+# def option(fail_count):
+#   dict = {}
+#   for keys, values in fail_count.items():
+#     validator = {}
+#     validator[keys] = fail_count[keys]
+#     node = {}
+#     validator[values] = node
+#     for keys, values in node.items():
+#       node[keys] = 'block_missed'
+#       node[values] = 1
+
+#     dict = {**dict, **validator}
+#   print(dict)
+#   return dict
+
 def main():
   arg_range = range_arg()
+  range = {'range' : arg_range}
   print(arg_range)
   missed = missed_block(arg_range)
-  with open('data.json', 'w') as mon_fichier:
-	  json.dump(missed, mon_fichier, indent=4)
+  merge = {'validator' : missed}
+  dict_json = {** range, ** merge}
+  with open('data.json', 'w') as file:
+    json.dump(dict_json, file, indent=4)
 
 if __name__ == "__main__":
     main()
