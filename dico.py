@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from email.policy import default
+from pydoc import cli
+import click
 import configparser
 from heapq import merge
 import json
@@ -13,6 +16,9 @@ from wsgiref.validate import validator
 import requests
 config = configparser.ConfigParser()
 config.read('config.cfg')
+
+#CLICK COMMAND
+
 
 #VERSION WITH INPUT
 
@@ -27,11 +33,12 @@ config.read('config.cfg')
 #       list.append(node)
 #     print(list)
 
-def option_arg():
-  nb = input("enter detail for more detail :  ")
-  if nb == 'detail':
-    return 1
-  return 0
+
+def option_arg(detail):
+  print(detail)
+  if detail == 0:
+    return 0
+  return 1
 
 #VERSION WITH CONFIG FILE
 
@@ -78,15 +85,16 @@ def low_heigth(range):
   low_height =  l - range
   return low_height
 
-def missed_block(range_block):
+
+def missed_block(range_block,detail):
   list = list_node_arg()
   fingerprint = nodes_fingerprint(list)
   fail_count= node_fail_count(fingerprint)
   print(fingerprint)
   print(fail_count)
   print(low_heigth(range_block),last_block_height())
-  detail = option_arg()
-  if detail == 1:
+  value = option_arg(detail)
+  if value == 1:
     for keys in fail_count:
       list_block_height = []
       height = {'block_missed' : 0, 'height' : list_block_height }
@@ -130,11 +138,17 @@ def missed_block(range_block):
   print(dict)
   return dict
 
-def main():
+@click.command()
+@click.option('--detail', is_flag=True, help='detail about height missed block')
+def main(detail):
+  if detail:
+    d = option_arg(1)
+  else:
+    d = option_arg(0)
   arg_range = range_arg()
   range = {'range' : arg_range}
   print(arg_range)
-  missed = missed_block(arg_range)
+  missed = missed_block(arg_range,d)
   merge = {**range,**missed}
   with open('data.json', 'w') as file:
     json.dump(merge, file, indent=4)
