@@ -6,9 +6,21 @@ import configparser
 import json
 import requests
 import timeit
+import subprocess
+
 config = configparser.ConfigParser()
 config.read('config.cfg')
 
+# def bring_moniker():
+#   config = {}
+#   validators = requests.get(url='http://localhost:33000/validators', headers={"Content-type": "application/json"})
+#   for moniker in validators.json["description"]["moniker"]:
+#     # bash = subprocess.call('./get_validator.sh')
+#     # config.update({moniker : bash})
+#     try:
+#       config.add_section("SETTINGS")
+#     except configparser.DuplicateSectionError:
+#       pass
 
 def option_arg(detail):
   '''
@@ -94,32 +106,30 @@ def missed_block(range_block,detail):
       fail_count[keys] = height
 
     for block in range(low_heigth(range_block), last_block_height()):
-      i = 0
-      block_signature = requests.get(url='http://localhost:33000/blocks/%s' %block, headers={"Content-type": "application/json"})
+      block_signatures = requests.get(url=f'http://localhost:33000/blocks/{block}', headers={"Content-type": "application/json"})
+      signatures = block_signatures.json()["block"]["last_commit"]["signatures"]
+      for key in fail_count:
+        validators_address = []
 
-      for keys in fail_count:
-        for key, values in fingerprint.items():
-          for signature in block_signature.json()["block"]["last_commit"]["signatures"]:
-            if values in signature["validator_address"]:
-              i=1
+        for signature in signatures:
+          validators_address.append(signature["validator_address"])
 
-          if i != 1:
-            fail_count[keys]["block_missed"] = fail_count[keys]["block_missed"] +1
-            fail_count[keys]['height'].append(int(block_signature.json()["block"]["header"]["height"])-1)
+        if fingerprint[key] not in validators_address:
+          fail_count[key]['block_missed'] += 1
+          fail_count[key]['height'].append(int(block_signatures.json()["block"]["header"]["height"])-1)
 
   else:
     for block in range(low_heigth(range_block), last_block_height()):
-      i = 0
-      block_signature = requests.get(url='http://localhost:33000/blocks/%s' %block, headers={"Content-type": "application/json"})
+      block_signatures = requests.get(url=f'http://localhost:33000/blocks/{block}', headers={"Content-type": "application/json"})
+      signatures = block_signatures.json()["block"]["last_commit"]["signatures"]
+      for key in fail_count:
+        validators_address = []
 
-      for keys in fail_count:
-        for keys, values in fingerprint.items():
-          for signature in block_signature.json()["block"]["last_commit"]["signatures"]:
-            if values in signature["validator_address"]:
-              i=1
+        for signature in signatures:
+          validators_address.append(signature["validator_address"])
 
-          if i != 1:
-            fail_count[keys] = fail_count[keys] +1
+        if fingerprint[key] not in validators_address:
+          fail_count[key] += 1
 
   dict = { "validator": fail_count}
   return dict
