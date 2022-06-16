@@ -1,8 +1,29 @@
 {
     "range": 100,
+    "time": 5.291910601000382,
     "validator": {
-        "hongkong-chain": 4,
-        "ledger": 0,
-        "binance": 0
+        "hongkong-chain": {
+            "block_missed": 10,
+            "height": [
+                10901553,
+                10901554,
+                10901555,
+                10901556,
+                10901563,
+                10901564,
+                10901590,
+                10901611,
+                10901635,
+                10901642
+            ]
+        },
+        "ledger": {
+            "block_missed": 0,
+            "height": []
+        },
+        "binance": {
+            "block_missed": 0,
+            "height": []
+        }
     }
 }
