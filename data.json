@@ -1,28 +1,18 @@
 {
     "range": 100,
-    "time": 4.957143526000436,
+    "time": 6.192740069000138,
     "validator": {
-        "blockscale": {
-            "block_missed": 0,
-            "height": []
-        },
         "ledger": {
             "block_missed": 0,
             "height": []
         },
-        "binance": {
-            "block_missed": 0,
-            "height": []
-        },
-        "nasdaq-btcs": {
-            "block_missed": 0,
-            "height": []
-        },
         "hongkong-chain": {
-            "block_missed": 2,
+            "block_missed": 4,
             "height": [
-                10904595,
-                10904668
+                10954096,
+                10954117,
+                10954118,
+                10954170
             ]
         }
     }

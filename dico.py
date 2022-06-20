@@ -11,16 +11,34 @@ import subprocess
 config = configparser.ConfigParser()
 config.read('config.cfg')
 
-# def bring_moniker():
-#   config = {}
-#   validators = requests.get(url='http://localhost:33000/validators', headers={"Content-type": "application/json"})
-#   for moniker in validators.json["description"]["moniker"]:
-#     # bash = subprocess.call('./get_validator.sh')
-#     # config.update({moniker : bash})
-#     try:
-#       config.add_section("SETTINGS")
-#     except configparser.DuplicateSectionError:
-#       pass
+filin = open("validator.txt", "r")
+lines = filin.readlines()
+
+def bring_moniker():
+  config_dict = {}
+  validators = requests.get(url='http://localhost:33000/validators/description/moniker', headers={"Content-type": "application/json"})
+  validator_moniker = validators.json()
+  print(validator_moniker)
+  # for monikers in validator_moniker:
+  #   bash = subprocess.call('./get_validator.sh')
+  #   config_dict.update({monikers : bash})
+  # print(dict)
+
+
+def validator_txt():
+  '''
+  construct the dict whith validators in validator.txt
+  '''
+  config.remove_section('List')
+  config.add_section('List')
+  for keys, values in config['Node'].items():
+    for line in lines:
+      if line.strip() == keys:
+        config.set('List', keys, values)
+
+  with open("config.cfg", "w") as f:
+    config.write(f)
+
 
 def option_arg(detail):
   '''
@@ -36,8 +54,8 @@ def list_node_arg():
   bring validators and stack them in a list
   '''
   list_node = {}
-  for node, finguerprint in config['List'].items():
-    list_node[node] = finguerprint
+  for node, fingerprint in config['List'].items():
+    list_node[node] = fingerprint
   return list_node
 
 
@@ -70,6 +88,7 @@ def node_fail_count(node_fingerprint):
     node_fail_count[keys] = 0
   return node_fail_count
 
+
 def last_block_height():
   '''
   return the height of the current block
@@ -77,6 +96,7 @@ def last_block_height():
   last_block = requests.get(url='http://localhost:33000/blocks/latest', headers={"Content-type": "application/json"})
   last_block_height = last_block.json()["block"]["header"]["height"]
   return int(last_block_height)
+
 
 def low_heigth(range):
   '''
@@ -134,6 +154,7 @@ def missed_block(range_block,detail):
   dict = { "validator": fail_count}
   return dict
 
+
 @click.command()
 @click.option('--detail', is_flag=True, help='detail about height missed block')
 @click.option('--time', is_flag=True, help='give the time of execution')
@@ -143,6 +164,9 @@ def main(detail,time):
   build a new dict
   write the output into json file
   '''
+  bring_moniker()
+  validator_txt()
+
   start = timeit.default_timer()
   if detail:
     d = option_arg(1)
