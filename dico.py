@@ -11,18 +11,84 @@ import subprocess
 config = configparser.ConfigParser()
 config.read('config.cfg')
 
-filin = open("validator.txt", "r")
-lines = filin.readlines()
+filin_read_validator = open("validator.txt", "r")
+read_validator = filin_read_validator.readlines()
+
+filin_validator_adress = open("fichier.txt", "r")
+validator_adress = filin_validator_adress.readlines()
+
 
 def bring_moniker():
+  '''
+  bring all validators from mintscan and write them in config.cfg
+  '''
+  config.remove_section('Node')
+  config.add_section('Node')
   config_dict = {}
-  validators = requests.get(url='http://localhost:33000/validators/description/moniker', headers={"Content-type": "application/json"})
-  validator_moniker = validators.json()
-  print(validator_moniker)
-  # for monikers in validator_moniker:
-  #   bash = subprocess.call('./get_validator.sh')
-  #   config_dict.update({monikers : bash})
-  # print(dict)
+  config_fingerprint = {}
+  validator = []
+  i = 0
+  j = 0
+  validators = requests.get(url='http://localhost:33000/cosmos/staking/v1beta1/validators?pagination.limit=15', headers={"Content-type": "application/json"})
+  validator_moniker = validators.json()["validators"]
+
+  for monikers in validator_moniker:
+    print(monikers["description"]["moniker"])
+    config_dict.update({ monikers["description"]["moniker"] :  monikers["consensus_pubkey"]})
+    validator.append(monikers["description"]["moniker"])
+  # print(validator)
+
+    # for moniker in config_dict.values():
+  #   gaia_parameters = json.dumps(moniker)
+  #   bash = subprocess.run(
+  #     ['./gaiad' ,'debug' ,'pubkey', gaia_parameters],
+  #     cwd="/home/vnguyen/go/bin",
+  #     capture_output=True,
+  #     text=True
+  #   )
+  #   with open("fichier.txt", "a") as fichier:
+  #     fichier.write(bash.stderr)
+
+  # f = open("fichier.txt", "w")
+  # for line in validator_adress:
+  #   if validator_adress.index(line) % 2 == 0:
+  #     adresse, fingerprint = line.split(":")
+  #     config_fingerprint = {validator[i] : fingerprint.strip()}
+  #     print(config_fingerprint)
+  #     i += 1
+  # f.truncate()
+  # f.close()
+
+  for moniker in config_dict.values():
+    gaia_parameters = json.dumps(moniker)
+    bash = subprocess.run(
+      ['./gaiad' ,'debug' ,'pubkey', gaia_parameters, '&>', 'fichier.txt'],
+      cwd="/home/vnguyen/go/bin",
+      # capture_output=True,
+      # text=True
+    )
+  #   if j == 0:
+  #     f = open("fichier.txt", "w")
+  #     f.write(bash.stderr)
+  #     f.close()
+  #     j+= 1
+
+  #   else:
+  #     f = open("fichier.txt", "a")
+  #     f.write(bash.stderr)
+  #     f.close()
+  #     j+= 1
+
+  # for line in validator_adress:
+  #   if validator_adress.index(line) % 2 == 0:
+  #     adresse, fingerprint = line.split(":")
+  #     config_fingerprint.update({validator[i] : fingerprint.strip()})
+  #     i += 1
+
+  # # print(config_fingerprint)
+
+  # for validator, fingerprint in config_fingerprint.items():
+  #   config.set('Node', validator, fingerprint)
 
 
 def validator_txt():
@@ -32,7 +98,7 @@ def validator_txt():
   config.remove_section('List')
   config.add_section('List')
   for keys, values in config['Node'].items():
-    for line in lines:
+    for line in read_validator:
       if line.strip() == keys:
         config.set('List', keys, values)
 
@@ -164,6 +230,7 @@ def main(detail,time):
   build a new dict
   write the output into json file
   '''
+
   bring_moniker()
   validator_txt()
 

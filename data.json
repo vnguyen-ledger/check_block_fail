@@ -1,19 +1,4 @@
 {
     "range": 100,
-    "time": 6.192740069000138,
-    "validator": {
-        "ledger": {
-            "block_missed": 0,
-            "height": []
-        },
-        "hongkong-chain": {
-            "block_missed": 4,
-            "height": [
-                10954096,
-                10954117,
-                10954118,
-                10954170
-            ]
-        }
-    }
+    "validator": {}
 }

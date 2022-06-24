@@ -1,2 +1,3 @@
 ledger
 hongkong-chain
+binance
