@@ -14,94 +14,41 @@ config.read('config.cfg')
 filin_read_validator = open("validator.txt", "r")
 read_validator = filin_read_validator.readlines()
 
-filin_validator_adress = open("fichier.txt", "r")
-validator_adress = filin_validator_adress.readlines()
-
-
 def bring_moniker():
   '''
   bring all validators from mintscan and write them in config.cfg
   '''
-  config.remove_section('Node')
-  config.add_section('Node')
   config_dict = {}
   config_fingerprint = {}
-  validator = []
-  i = 0
-  j = 0
-  validators = requests.get(url='http://localhost:33000/cosmos/staking/v1beta1/validators?pagination.limit=15', headers={"Content-type": "application/json"})
+
+  validators = requests.get(url='http://localhost:33000/cosmos/staking/v1beta1/validators?pagination.limit=400', headers={"Content-type": "application/json"})
   validator_moniker = validators.json()["validators"]
 
   for monikers in validator_moniker:
-    print(monikers["description"]["moniker"])
     config_dict.update({ monikers["description"]["moniker"] :  monikers["consensus_pubkey"]})
-    validator.append(monikers["description"]["moniker"])
-  # print(validator)
+    gaia_parameters = json.dumps(monikers["consensus_pubkey"])
 
-    # for moniker in config_dict.values():
-  #   gaia_parameters = json.dumps(moniker)
-  #   bash = subprocess.run(
-  #     ['./gaiad' ,'debug' ,'pubkey', gaia_parameters],
-  #     cwd="/home/vnguyen/go/bin",
-  #     capture_output=True,
-  #     text=True
-  #   )
-  #   with open("fichier.txt", "a") as fichier:
-  #     fichier.write(bash.stderr)
-
-  # f = open("fichier.txt", "w")
-  # for line in validator_adress:
-  #   if validator_adress.index(line) % 2 == 0:
-  #     adresse, fingerprint = line.split(":")
-  #     config_fingerprint = {validator[i] : fingerprint.strip()}
-  #     print(config_fingerprint)
-  #     i += 1
-  # f.truncate()
-  # f.close()
-
-  for moniker in config_dict.values():
-    gaia_parameters = json.dumps(moniker)
     bash = subprocess.run(
-      ['./gaiad' ,'debug' ,'pubkey', gaia_parameters, '&>', 'fichier.txt'],
+      ['./gaiad' ,'debug' ,'pubkey', gaia_parameters],
       cwd="/home/vnguyen/go/bin",
-      # capture_output=True,
-      # text=True
+      capture_output=True,
+      text=True
     )
-  #   if j == 0:
-  #     f = open("fichier.txt", "w")
-  #     f.write(bash.stderr)
-  #     f.close()
-  #     j+= 1
-
-  #   else:
-  #     f = open("fichier.txt", "a")
-  #     f.write(bash.stderr)
-  #     f.close()
-  #     j+= 1
-
-  # for line in validator_adress:
-  #   if validator_adress.index(line) % 2 == 0:
-  #     adresse, fingerprint = line.split(":")
-  #     config_fingerprint.update({validator[i] : fingerprint.strip()})
-  #     i += 1
-
-  # # print(config_fingerprint)
-
-  # for validator, fingerprint in config_fingerprint.items():
-  #   config.set('Node', validator, fingerprint)
+    output_bash = bash.stderr.partition('\n')[0].split(' ')[1]
+    config_fingerprint.update({monikers["description"]["moniker"]: output_bash})
+  return config_fingerprint
 
 
-def validator_txt():
+def validator_txt(fingerprints):
   '''
   construct the dict whith validators in validator.txt
   '''
   config.remove_section('List')
   config.add_section('List')
-  for keys, values in config['Node'].items():
-    for line in read_validator:
-      if line.strip() == keys:
-        config.set('List', keys, values)
-
+  for keys, values in fingerprints.items():
+    for lines in read_validator:
+      if lines.strip() == keys:
+        config.set('List', f"'{keys}'", values)
   with open("config.cfg", "w") as f:
     config.write(f)
 
@@ -110,9 +57,7 @@ def option_arg(detail):
   '''
   return option detail/normal (--detail)
   '''
-  if detail == 0:
-    return 0
-  return 1
+  return detail == 0
 
 
 def list_node_arg():
@@ -139,7 +84,7 @@ def nodes_fingerprint(list_node):
   '''
   node_fingerprint = {}
   for arg in list_node:
-    for node, fingerprint in config['Node'].items():
+    for node, fingerprint in config['List'].items():
       if arg in node:
         node_fingerprint[node] = fingerprint
   return node_fingerprint
@@ -231,8 +176,8 @@ def main(detail,time):
   write the output into json file
   '''
 
-  bring_moniker()
-  validator_txt()
+  bring = bring_moniker()
+  validator_txt(bring)
 
   start = timeit.default_timer()
   if detail:

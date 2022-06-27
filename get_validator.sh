@@ -3,5 +3,6 @@
 cd
 cd go/bin/
 
-./gaiad debug pubkey '{"@type":"/cosmos.crypto.ed25519.PubKey","key":"JA4/VYklSa+qv6e1cK870ZDGliyGtdD4uyaVMC7eSxI="}' &>> ~/Documents/bash/fichier.txt
+echo #1
 
+./gaiad debug pubkey $1 2>&1 | head -n-1 | awk '{print $2}'
