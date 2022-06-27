@@ -7,12 +7,25 @@ import json
 import requests
 import timeit
 import subprocess
+import sys
 
 config = configparser.ConfigParser()
 config.read('config.cfg')
 
 filin_read_validator = open("validator.txt", "r")
 read_validator = filin_read_validator.readlines()
+
+
+def check_ssh_tunnel():
+  '''
+  check if the ssh tunnel is mounted
+  '''
+  try:
+    check = requests.get(url='http://localhost:33000/cosmos/', headers={"Content-type": "application/json"})
+  except:
+    # print("Port not listening on 33000, exiting...")
+    sys.exit("Port not listening on 33000, exiting...")
+
 
 def bring_moniker():
   '''
@@ -175,7 +188,7 @@ def main(detail,time):
   build a new dict
   write the output into json file
   '''
-
+  check_ssh_tunnel()
   bring = bring_moniker()
   validator_txt(bring)
 
@@ -198,9 +211,8 @@ def main(detail,time):
 
   merge = {**range,**missed}
 
+  print(json.dumps(merge, indent=4))
 
-  with open('data.json', 'w') as file:
-    json.dump(merge, file, indent=4)
 
 if __name__ == "__main__":
     main()
