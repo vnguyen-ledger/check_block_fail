@@ -6,8 +6,12 @@ This script allow you to check in the block chain if validators have failed to s
 
 ## Pre-requisites
 
-+ ssh to a cosmos validator
-+ download gaia
++ fullnode who can expose his API
++ the port used is 33000
++ download go and gaia
++ check if gaia is on user/go/bin
++ if no, change the path on ligne 45
++ create a ssh tunnel to ur fullnode
 
 ## Run
 
