@@ -6,25 +6,30 @@ This script allow you to check in the block chain if validators have failed to s
 
 ## Pre-requisites
 
++ install click
++ install requests
 + fullnode who can expose his API
 + the port used is 33000
 + download go and gaia
-+ check if gaia is on user/go/bin
-+ if no, change the path on ligne 45
-+ create a ssh tunnel to ur fullnode
++ add gaia to the PATH
++ create a ssh tunnel to your fullnode
 
 ## Run
 
-**step :** 
+**step :**
 
 + Go to validator.txt and write the exact name of validators that you want to work on (https://www.mintscan.io/cosmos/validators)
-+ Go to config.cfg and enter the range of block that you want to check 
++ Go to config.cfg and enter the range of block that you want to check
 
-**different option :** 
+**Usage:** check_block_fail.py [OPTIONS]
 
-+ --detail : give more informations about blocks (height missed block)
-+ --time : give the time of execution
-+ --help : display this all available option
+  displays all missed blocks for each validator in json format
+
+**Options:**
+  --detail  detail about height missed block
+  --time    give the time of execution
+  --help    Show this message and exit.
+
 
 **command :** python3 dico.py --{optionnal}
 

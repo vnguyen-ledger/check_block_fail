@@ -41,8 +41,7 @@ def bring_moniker():
     gaia_parameters = json.dumps(monikers["consensus_pubkey"])
 
     bash = subprocess.run(
-      ['./gaiad' ,'debug' ,'pubkey', gaia_parameters],
-      cwd="/home/vnguyen/go/bin",
+      ['gaiad' ,'debug' ,'pubkey', gaia_parameters],
       capture_output=True,
       text=True
     )
