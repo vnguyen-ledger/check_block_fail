@@ -23,7 +23,6 @@ def check_ssh_tunnel():
   try:
     check = requests.get(url='http://localhost:33000/cosmos/', headers={"Content-type": "application/json"})
   except:
-    # print("Port not listening on 33000, exiting...")
     sys.exit("Port not listening on 33000, exiting...")
 
 
